@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4. Respuesta Postulación | Crecer Más</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f7f7f9; }
+        .response-slide { transition: height 0.5s ease-in-out; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar Fija -->
+    <header class="bg-indigo-700 shadow-lg sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">Crecer Más</h1>
+            <div class="space-x-4">
+                <a href="index.html" class="text-white hover:text-indigo-200 transition duration-150 font-medium">Inicio</a>
+                <a href="login.html" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400 transition duration-150 font-medium">Ingresar</a>
+                <a href="admin_login.html" class="text-white hover:text-indigo-200 transition duration-150 font-medium">Admin</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Contenedor Principal de Vistas -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+
+        <!-- 4. Vista Respuesta (Resultado de Postulación/Perfil) -->
+        <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl text-center">
+            <h2 id="responseTitle" class="text-4xl font-extrabold mb-4"></h2>
+            <p id="responseMessage" class="text-lg mb-8"></p>
+
+            <!-- Área de Opciones (Slide) - visible solo si es aprobado -->
+            <div id="profileOptions" class="overflow-hidden h-0 response-slide">
+                <div class="border-t pt-6 mt-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Opciones de Perfil</h3>
+                    <div class="flex justify-center space-x-4">
+                        <button onclick="showMessage('Funcionalidad de edición de datos simulada.')" class="p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105">
+                            Cambiar mis Datos
+                        </button>
+                        <button onclick="showMessage('Funcionalidad de cambio de contraseña simulada.')" class="p-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition duration-300 transform hover:scale-105">
+                            Cambiar Contraseña
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="index.html" class="mt-8 inline-block py-2 px-4 bg-gray-300 text-gray-800 font-bold rounded-lg hover:bg-gray-400 transition duration-300">
+                Volver a Inicio
+            </a>
+        </div>
+    </main>
+    
+    <!-- Contenedor para Mensajes -->
+    <div id="messageBox" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center z-[9999]">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <h4 class="text-xl font-bold mb-3 text-indigo-700">Aviso</h4>
+            <p id="messageContent" class="mb-4 text-gray-700"></p>
+            <button onclick="closeMessageBox()" class="py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Aceptar</button>
+        </div>
+    </div>
+
+    <script>
+        // Funciones de utilidad esenciales replicadas para auto-contención
+        const APP_ID = 'crecerMasApp';
+        const MAX_APPROVED = 3;
+        function loadData() {
+            try {
+                const data = localStorage.getItem(APP_ID);
+                return data ? JSON.parse(data) : { approvedApplicants: [] };
+            } catch (e) { return { approvedApplicants: [] }; }
+        }
+        function showMessage(message) {
+            document.getElementById('messageContent').textContent = message;
+            document.getElementById('messageBox').classList.remove('hidden');
+            document.getElementById('messageBox').classList.add('flex');
+        }
+        function closeMessageBox() {
+            document.getElementById('messageBox').classList.remove('flex');
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const rut = params.get('rut');
+
+            const responseTitle = document.getElementById('responseTitle');
+            const responseMessage = document.getElementById('responseMessage');
+            const profileOptions = document.getElementById('profileOptions');
+
+            if (!rut) {
+                responseTitle.textContent = 'Error de Acceso';
+                responseTitle.classList.add('text-red-600');
+                responseMessage.textContent = 'Por favor, ingrese su RUT a través de la página de Login.';
+                profileOptions.style.height = '0';
+                return;
+            }
+
+            const data = loadData();
+            const applicant = data.approvedApplicants.find(app => app.rut === rut);
+
+            if (applicant) {
+                // Caso 1: Postulante APROBADO (Encontrado en la lista)
+                responseTitle.textContent = '¡Bienvenido a Crecer Más!';
+                responseTitle.classList.remove('text-red-600');
+                responseTitle.classList.add('text-green-600');
+                responseMessage.textContent = `¡Felicitaciones, ${applicant.nombre}! Tu postulación ha sido exitosa.`;
+                
+                // Mostrar opciones de perfil
+                profileOptions.style.height = profileOptions.scrollHeight + 'px'; // Altura dinámica
+            } else {
+                // Caso 2: Postulante NO APROBADO (No encontrado)
+                responseTitle.textContent = 'Lo Sentimos';
+                responseTitle.classList.remove('text-green-600');
+                responseTitle.classList.add('text-red-600');
+                responseMessage.textContent = 'Su RUT no está registrado o la postulación fue rechazada. Tenemos cupos llenos.';
+                
+                // Ocultar opciones de perfil
+                profileOptions.style.height = '0';
+            }
+        });
+    </script>
+</body>
+</html>

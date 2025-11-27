@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5. Admin Login | Crecer Más</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f7f7f9; }
+        .input-field { @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar Fija -->
+    <header class="bg-indigo-700 shadow-lg sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">Crecer Más</h1>
+            <div class="space-x-4">
+                <a href="index.html" class="text-white hover:text-indigo-200 transition duration-150 font-medium">Inicio</a>
+                <a href="login.html" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400 transition duration-150 font-medium">Ingresar</a>
+                <a href="admin_login.html" class="text-white hover:text-indigo-200 transition duration-150 font-medium">Admin</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Contenedor Principal de Vistas -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+
+        <!-- 5. Vista Login Administrador -->
+        <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-2xl text-center border-t-4 border-red-500">
+            <h2 class="text-3xl font-bold text-red-600 mb-6">Acceso de Administrador</h2>
+            <form id="adminLoginForm">
+                <!-- Usaremos un RUT/Contraseña fijo simulado -->
+                <input type="text" id="admin_user" placeholder="Usuario (admin)" required class="input-field text-center mb-4">
+                <input type="password" id="admin_pass" placeholder="Contraseña (123)" required class="input-field text-center mb-4">
+                <button type="submit" class="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition duration-300">
+                    ACCEDER
+                </button>
+            </form>
+        </div>
+    </main>
+    
+    <!-- Contenedor para Mensajes -->
+    <div id="messageBox" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center z-[9999]">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <h4 class="text-xl font-bold mb-3 text-indigo-700">Aviso</h4>
+            <p id="messageContent" class="mb-4 text-gray-700"></p>
+            <button onclick="closeMessageBox()" class="py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Aceptar</button>
+        </div>
+    </div>
+
+    <script>
+        // Funciones de utilidad esenciales replicadas para auto-contención
+        const APP_ID = 'crecerMasApp';
+        const MAX_APPROVED = 3;
+        function loadData() {
+            try {
+                const data = localStorage.getItem(APP_ID);
+                return data ? JSON.parse(data) : { approvedApplicants: [] };
+            } catch (e) { return { approvedApplicants: [] }; }
+        }
+        function showMessage(message) {
+            document.getElementById('messageContent').textContent = message;
+            document.getElementById('messageBox').classList.remove('hidden');
+            document.getElementById('messageBox').classList.add('flex');
+        }
+        function closeMessageBox() {
+            document.getElementById('messageBox').classList.remove('flex');
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const user = document.getElementById('admin_user').value;
+            const pass = document.getElementById('admin_pass').value;
+
+            // Credenciales fijas simuladas
+            if (user === 'admin' && pass === '123') {
+                showMessage('Acceso de Administrador exitoso.');
+                // Redirigir al dashboard
+                window.location.href = 'admin_dashboard.html';
+            } else {
+                showMessage('Credenciales de administrador incorrectas.');
+            }
+            this.reset();
+        });
+    </script>
+</body>
+</html>

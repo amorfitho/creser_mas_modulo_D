@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6. Panel Admin | Crecer Más</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f7f7f9; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar Fija -->
+    <header class="bg-indigo-700 shadow-lg sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">Crecer Más</h1>
+            <div class="space-x-4">
+                <a href="index.html" class="text-white hover:text-indigo-200 transition duration-150 font-medium">Inicio</a>
+                <a href="login.html" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400 transition duration-150 font-medium">Ingresar</a>
+                <a href="admin_login.html" class="text-white hover:text-indigo-200 transition duration-150 font-medium">Admin</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Contenedor Principal de Vistas -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+
+        <!-- 6. Vista Administrador (Lista de postulantes) -->
+        <div class="bg-white p-6 md:p-10 rounded-xl shadow-2xl">
+            <h2 class="text-3xl font-bold text-red-600 mb-6 border-b pb-3">Panel de Administrador (Postulantes Aprobados)</h2>
+            <p class="text-lg text-gray-700 mb-4">Máximo de Postulantes Aprobados: <span id="maxApplicants">3</span></p>
+            <div id="applicantListContainer" class="space-y-3">
+                <!-- Los postulantes se inyectarán aquí -->
+                <p class="text-gray-500" id="emptyMessage">No hay postulantes aprobados actualmente.</p>
+            </div>
+            <a href="index.html" class="mt-8 inline-block py-2 px-4 bg-gray-400 text-gray-800 font-bold rounded-lg hover:bg-gray-500 transition duration-300">
+                Cerrar Sesión Admin
+            </a>
+        </div>
+    </main>
+    
+    <!-- Contenedor para Mensajes -->
+    <div id="messageBox" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center z-[9999]">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <h4 class="text-xl font-bold mb-3 text-indigo-700">Aviso</h4>
+            <p id="messageContent" class="mb-4 text-gray-700"></p>
+            <button onclick="closeMessageBox()" class="py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Aceptar</button>
+        </div>
+    </div>
+
+    <script>
+        // Funciones de utilidad esenciales replicadas para auto-contención
+        const APP_ID = 'crecerMasApp';
+        const MAX_APPROVED = 3;
+        function loadData() {
+            try {
+                const data = localStorage.getItem(APP_ID);
+                return data ? JSON.parse(data) : { approvedApplicants: [] };
+            } catch (e) { return { approvedApplicants: [] }; }
+        }
+        function saveData(data) {
+            try {
+                localStorage.setItem(APP_ID, JSON.stringify(data));
+            } catch (e) { console.error("Error al guardar:", e); }
+        }
+        function showMessage(message) {
+            document.getElementById('messageContent').textContent = message;
+            document.getElementById('messageBox').classList.remove('hidden');
+            document.getElementById('messageBox').classList.add('flex');
+        }
+        function closeMessageBox() {
+            document.getElementById('messageBox').classList.remove('flex');
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        function renderAdminList() {
+            const data = loadData();
+            const listContainer = document.getElementById('applicantListContainer');
+            const emptyMessage = document.getElementById('emptyMessage');
+            listContainer.innerHTML = '';
+
+            if (data.approvedApplicants.length === 0) {
+                emptyMessage.style.display = 'block';
+                listContainer.appendChild(emptyMessage);
+                return;
+            }
+            
+            emptyMessage.style.display = 'none';
+
+            data.approvedApplicants.forEach((applicant, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200';
+                item.innerHTML = `
+                    <span class="text-gray-800 font-medium mb-2 sm:mb-0">
+                        <span class="text-sm font-light text-gray-500">Postulante ${index + 1}:</span>
+                        <strong class="text-indigo-600">${applicant.nombre} ${applicant.apellido}</strong>
+                        <span class="text-sm text-gray-500 ml-2 block sm:inline">(${applicant.rut})</span>
+                    </span>
+                    <button onclick="deleteApplicant('${applicant.rut}')" class="delete-btn px-3 py-1 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition duration-150">
+                        Borrar
+                    </button>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function deleteApplicant(rutToDelete) {
+            let data = loadData();
+            
+            const initialLength = data.approvedApplicants.length;
+            data.approvedApplicants = data.approvedApplicants.filter(app => app.rut !== rutToDelete);
+
+            if (data.approvedApplicants.length < initialLength) {
+                saveData(data);
+                showMessage(`Postulante con RUT ${rutToDelete} ha sido borrado exitosamente.`);
+                renderAdminList(); // Volver a renderizar la lista
+            } else {
+                showMessage('Error: No se encontró al postulante para borrar.');
+            }
+        }
+
+        // Renderizar la lista al cargar la página
+        document.addEventListener('DOMContentLoaded', renderAdminList);
+    </script>
+</body>
+</html>
