@@ -35,7 +35,7 @@
             <form id="loginForm">
                 <input type="text" id="login_rut" placeholder="Ingresa tu RUT (Ej: 12345678-9)" required class="input-field text-center mb-4">
                 <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition duration-300">
-                    INGRESAR
+                    <a href="respuesta.html"></a>INGRESAR
                 </button>
             </form>
         </div>
@@ -87,7 +87,7 @@
 
             // Redirigimos a response.html, pasando el RUT como parámetro de búsqueda
             // Esto permite que response.html sepa qué RUT buscar
-            window.location.href = `response.html?rut=${encodeURIComponent(rut)}`;
+            window.location.href = `respuesta.html?rut=${encodeURIComponent(rut)}`;
         }
     </script>
 </body>
